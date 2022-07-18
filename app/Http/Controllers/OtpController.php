@@ -20,12 +20,10 @@ class OtpController extends Controller
             'code' => ['required']
         ]);
 
-        if($validate['code'] == '111111'){
-            $code = new OtpCodes();
-            $code->code = $validate['code'];
-            $code->expiresOn = Carbon::now()->addHour();
-            $code->user_id = $request->user()->id;
-            $code->save();
+
+        $dbKey = OtpCodes::where([['code', $validate['code']], ['user_id', $request->user()->id]])->first();
+
+        if($dbKey && $dbKey->expiresOn > Carbon::now()){
             $request->session()->put('otp_key', $validate['code']);
             return redirect('/dashboard');
         }
@@ -35,7 +33,12 @@ class OtpController extends Controller
         ]);
     }
 
-    public function index() {
+    public function index(Request $request) {
+        $code = new OtpCodes();
+        $code->code = '111111';
+        $code->expiresOn = Carbon::now()->addHour();
+        $code->user_id = $request->user()->id;
+        $code->save();
         return view('otp');
     }
 }

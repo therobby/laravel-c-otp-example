@@ -24,9 +24,7 @@ class OtpIsValid
 
         $otpKey = $request->session()->get('otp_key', false);
 
-        $dbKey = OtpCodes::where([['code', $otpKey], ['user_id', $request->user()->id]])->first();
-
-        if($dbKey && $dbKey->expiresOn > Carbon::now()){
+        if($otpKey) {
             return $next($request);
         }
 
